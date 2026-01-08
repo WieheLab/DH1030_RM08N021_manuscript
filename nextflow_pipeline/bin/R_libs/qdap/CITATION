@@ -1,0 +1,14 @@
+## R package reference generated from DESCRIPTION metadata
+citation(auto = meta)
+
+## NLME book
+bibentry(bibtype = "Manual",
+    title = "{qdap}: {Q}uantitative Discourse Analysis Package",
+    author = "Tyler W. Rinker",
+    address = "Buffalo, New York",
+    note = "2.4.6",
+    year = "2023",
+    url = "https://github.com/trinker/qdap")
+         
+         
+
