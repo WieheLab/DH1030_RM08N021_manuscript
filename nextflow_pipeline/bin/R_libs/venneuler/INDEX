@@ -1,0 +1,2 @@
+plot.VennDiagram        'plot' method for Venn diagrams
+venneuler               Calculates Venn and Euler Diagram
