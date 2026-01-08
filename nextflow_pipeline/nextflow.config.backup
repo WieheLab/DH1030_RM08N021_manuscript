@@ -1,0 +1,102 @@
+workDir = "${NXF_WORKDIR}"
+
+conda.enabled = true
+
+process {
+    executor = 'slurm'
+
+    withName: makefastq_gex {
+        cpus = 10
+        memory = '250 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --job-name=mkfastq_gex'
+    }
+
+    withName: count_gex {
+        cpus = 10
+        memory = '250 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --job-name=count_gex'
+    }
+
+    withName: agg_gex {
+        cpus = 10
+        memory = '250 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --job-name=agg_gex'
+    }
+
+
+    withName: makefastq_vdj {
+        cpus = 10
+        memory = '250 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --job-name=mkfastq_vdj'
+    }
+
+    withName: vdj {
+        cpus = 10
+        memory = '100 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --job-name=vdj'
+    }
+
+    withName: fxnl_1to1_clonal_analysis_human {
+        memory = '100 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --ntasks=10 --ntasks-per-node=10 --job-name=c_fnxl_1to1_human'
+    }
+
+    withName: fxnl_1to1_clonal_analysis_rhesus {
+        memory = '100 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --ntasks=10 --ntasks-per-node=10 --job-name=c_fnxl_1to1_rhesus'
+    }
+
+
+    withName: fxnl_1to1_clonal_analysis_mouse {
+        memory = '100 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --ntasks=10 --ntasks-per-node=10 --job-name=c_fnxl_1to1_mouse'
+    }
+
+    withName: partis_fxnl_1to1_clonal_analysis_human {
+        memory = '100 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --ntasks=10 --ntasks-per-node=10 --job-name=p_fnxl_1to1_human'
+    }
+
+    withName: partis_fxnl_1to1_clonal_analysis_rhesus {
+        memory = '100 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --ntasks=10 --ntasks-per-node=10 --job-name=p_fnxl_1to1_rhesus'
+    }
+
+
+    withName: partis_fxnl_1to1_clonal_analysis_mouse {
+        memory = '100 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --ntasks=10 --ntasks-per-node=10 --job-name=p_fnxl_1to1_mouse'
+    }
+
+    withName: merged_cloanalyst_partis {
+        memory = '50 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --ntasks=2 --ntasks-per-node=2 --job-name=merge_cloanalyst_partis'
+    }
+
+    withName: makefastq_beam {
+        cpus = 10
+        memory = '250 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --job-name=mkfastq_beam'
+    }
+    
+
+    withName: count_beam {
+        cpus = 10
+        memory = '250 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --job-name=count_beam'
+    }
+
+    withName: mat2csv {
+        cpus = 10
+        memory = '50 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --job-name=mat2csv'
+    }
+    
+    withName: calc_beam_scores {
+        cpus = 10
+        memory = '50 GB'
+        clusterOptions = '--partition=dhvi --time=7-00:00:00 --job-name=calc_beam_scores'
+    }
+    
+
+}

@@ -1,0 +1,85 @@
+#!/bin/bash
+#SBATCH --job-name=nf_gex
+#SBATCH --ntasks=2
+#SBATCH --error=%x-%j.err
+#SBATCH --out=%x-%j.out
+#SBATCH --mem=16G
+#SBATCH --partition=dhvi
+#SBATCH --ntasks-per-node=2
+
+# Default values for variables
+SAMPLE_ID=""
+SPECIES=""
+GEX_RAW=""
+GEX_CSV=""
+OUTDIR=""
+CELLRANGER_VERSION=""
+RESUME="false"
+
+# Parse flags using getopts
+while getopts ":i:s:d:c:o:v:r" opt; do
+  case ${opt} in
+    i )
+      SAMPLE_ID=$OPTARG
+      ;;
+    s )
+      SPECIES=$OPTARG
+      ;;
+    d )
+      GEX_RAW=$OPTARG
+      ;;
+    c )
+      GEX_CSV=$OPTARG
+      ;;
+    o )
+      OUTDIR=$OPTARG
+      ;;
+    v )
+      CELLRANGER_VERSION=$OPTARG
+      ;;
+    r )
+      RESUME="true"  # Optional flag for resume
+      ;;
+    \? )
+      echo "Invalid option: -$OPTARG" 1>&2
+      exit 1
+      ;;
+    : )
+      echo "Error: Option -$OPTARG requires an argument." 1>&2
+      exit 1
+      ;;
+  esac
+done
+
+# Check if all required arguments are provided
+if [ -z "$SAMPLE_ID" ] || [ -z "$SPECIES" ] || [ -z "$GEX_RAW" ] || [ -z "$GEX_CSV" ] || [ -z "$OUTDIR" ] || [ -z "$CELLRANGER_VERSION" ]; then
+  echo "Error: Missing arguments."
+  echo "Usage: $0 -i <sample_id> -s <species> -d <gex_raw_path> -c <gex_csv_path> -o <output_dir> -v <cellranger_version> [-r]"
+  exit 1
+fi
+
+USERNAME=$(id -un)
+export NXF_WORKDIR="/work/${USERNAME}/work"
+export EMAIL="${USERNAME}@duke.edu"
+
+# Create output directory if it doesn't exist and change to it
+mkdir -p "$OUTDIR"
+cd "$OUTDIR"
+
+# Construct Nextflow command with optional -resume
+NEXTFLOW_CMD="nextflow run /hpc/group/dhvi/WieheLab/scripts/nextflow_pipelines/10x-nextflow-pipeline/10x_pipeline.nf \
+    --workflow gex \
+    --sample_id \"$SAMPLE_ID\" \
+    --species \"$SPECIES\" \
+    --gex_raw \"$GEX_RAW\" \
+    --gex_csv \"$GEX_CSV\" \
+    --outdir \"$OUTDIR\" \
+    --cellranger \"$CELLRANGER_VERSION\""
+
+# Add -resume if the resume flag is set
+if [ "$RESUME" == "true" ]; then
+    NEXTFLOW_CMD+=" -resume"
+fi
+
+# Execute the Nextflow command
+eval $NEXTFLOW_CMD

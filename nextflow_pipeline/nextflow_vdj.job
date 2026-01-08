@@ -1,0 +1,100 @@
+#!/bin/bash
+#SBATCH --job-name=nf_vdj
+#SBATCH --ntasks=2
+#SBATCH --error=%x-%j.err
+#SBATCH --out=%x-%j.out
+#SBATCH --mem=16G
+#SBATCH --partition=dhvi
+#SBATCH --ntasks-per-node=2
+
+# Default values for variables
+SPECIES=""
+VDJ_RAW=""
+SAMPLE_ID=""
+VDJ_CSV=""
+OUTDIR=""
+CELLRANGER_VERSION=""
+CLONAL=""
+GERMLINE=""
+RESUME="false"
+
+# Parse flags using getopts
+while getopts ":s:d:i:c:o:v:a:g:r" opt; do
+  case ${opt} in
+    s )
+      SPECIES=$OPTARG
+      ;;
+    d )
+      VDJ_RAW=$OPTARG
+      ;;
+    i )
+      SAMPLE_ID=$OPTARG
+      ;;
+    c )
+      VDJ_CSV=$OPTARG
+      ;;
+    o )
+      OUTDIR=$OPTARG
+      ;;
+    v )
+      CELLRANGER_VERSION=$OPTARG
+      ;;
+    a )
+      CLONAL=$OPTARG  # Required argument for clonal
+      ;;
+    g )
+      GERMLINE=$OPTARG  # Optional argument for germline
+      ;;
+    r )
+      RESUME="true"  # Optional flag for resume
+      ;;
+    \? )
+      echo "Invalid option: -$OPTARG" 1>&2
+      exit 1
+      ;;
+    : )
+      echo "Error: Option -$OPTARG requires an argument." 1>&2
+      exit 1
+      ;;
+  esac
+done
+
+# Check if all required arguments (except germline and resume) are provided
+if [ -z "$SPECIES" ] || [ -z "$VDJ_RAW" ] || [ -z "$SAMPLE_ID" ] || [ -z "$VDJ_CSV" ] || [ -z "$OUTDIR" ] || [ -z "$CELLRANGER_VERSION" ] || [ -z "$CLONAL" ]; then
+  echo "Error: Missing arguments."
+  echo "Usage: $0 -s <species> -d <vdj_raw_path> -i <sample_id> -c <vdj_csv_path> -o <output_dir> -v <cellranger_version> -a <clonal> [-g <germline>] [-r]"
+  exit 1
+fi
+
+USERNAME=$(id -un)
+export NXF_WORKDIR="/work/${USERNAME}/work"
+export EMAIL="${USERNAME}@duke.edu"
+
+# Create output directory if it doesn't exist and change to it
+mkdir -p "$OUTDIR"
+cd "$OUTDIR"
+
+# Construct base Nextflow command
+NEXTFLOW_CMD="nextflow run /hpc/group/dhvi/WieheLab/scripts/nextflow_pipelines/10x-nextflow-pipeline/10x_pipeline.nf \
+    --workflow vdj \
+    --species \"$SPECIES\" \
+    --vdj_raw \"$VDJ_RAW\" \
+    --sample_id \"$SAMPLE_ID\" \
+    --vdj_csv \"$VDJ_CSV\" \
+    --outdir \"$OUTDIR\" \
+    --cellranger \"$CELLRANGER_VERSION\" \
+    --clonal \"$CLONAL\""
+
+# Add optional germline parameter if provided
+if [ -n "$GERMLINE" ]; then
+    NEXTFLOW_CMD+=" --germline \"$GERMLINE\""
+fi
+
+# Add -resume if the resume flag is set
+if [ "$RESUME" == "true" ]; then
+    NEXTFLOW_CMD+=" -resume"
+fi
+
+# Execute the Nextflow command
+eval $NEXTFLOW_CMD
+

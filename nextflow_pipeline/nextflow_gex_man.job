@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --job-name=nf_gex
+#SBATCH --ntasks=2
+#SBATCH --error=nf_gex-%j.out
+#SBATCH --out=nf_gex-%j.out
+#SBATCH --mem=16G
+#SBATCH --partition=dhvi
+#SBATCH --ntasks-per-node=2
+
+# Set Nextflow work directory (where process folders and log files are created-- this is different from the output directory)
+USERNAME=$(id -un)
+export NXF_WORKDIR="/work/${USERNAME}"
+export EMAIL="${USERNAME}@duke.edu"
+
+pipeoutdir=/datacommons/dhvi/10X_Genomics_data/Maria_Blasi/NHP197/Group1_IDLV/CX53/Pre/CR7.2/GEX
+mkdir -p "$pipeoutdir"
+cd "$pipeoutdir"
+
+nextflow run /hpc/group/dhvi/WieheLab/scripts/nextflow_pipelines/10x-nextflow-pipeline/10x_pipeline.nf \
+--workflow gex \
+--sample_id CX53 \
+--species rhesus \
+--gex_raw /datacommons/dhvi/10X_Genomics_data/raw_data/Maria_Blasi/NHP197/20240917_LH00373_0186_A22NLHJLT3 \
+--gex_csv /datacommons/dhvi/10X_Genomics_data/Maria_Blasi/NHP197/Group1_IDLV/CX53/Pre/CR7.2/GEX/CX53_GEX.csv \
+--outdir /datacommons/dhvi/10X_Genomics_data/Maria_Blasi/NHP197/Group1_IDLV/CX53/Pre/CR7.2 \
+--cellranger 7.2.0

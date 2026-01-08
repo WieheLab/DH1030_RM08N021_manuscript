@@ -1,0 +1,33 @@
+#!/bin/bash
+#SBATCH --job-name=nf_beam
+#SBATCH --ntasks=2
+#SBATCH --error=nf_beam-%j.err
+#SBATCH --out=nf_beam-%j.out
+#SBATCH --mem=16G
+#SBATCH --partition=dhvi
+#SBATCH --ntasks-per-node=2
+
+# Set Nextflow work directory (where process folders and log files are created-- this is different from the output directory)
+USERNAME=$(id -un)
+export NXF_WORKDIR="/work/${USERNAME}"
+export EMAIL="${USERNAME}@duke.edu"
+
+pipeoutdir=
+mkdir -p "$pipeoutdir"
+cd "$pipeoutdir"
+
+nextflow run /hpc/group/dhvi/WieheLab/scripts/nextflow_pipelines/10x-nextflow-pipeline \
+--workflow beam \
+--exp CovidBEAM \
+--ptid CR024 \
+--species human \
+--vdj_raw /datacommons/dhvi/10X_Genomics_data/raw_data/BEAM/Covid_BEAM_VDJ_11012023/ \
+--beam_raw /datacommons/dhvi/10X_Genomics_data/raw_data/BEAM/Covid_BEAM_VDJ_11012023/ \
+--sample_id COVID_BEAM \
+--vdj_csv /datacommons/dhvi/10X_Genomics_data/COVID/BEAM/CR024_Vaccinee_BEAM_VDJ/VDJ/cellranger/COVID_BEAM_VDJ.csv \
+--beam_csv /datacommons/dhvi/10X_Genomics_data/COVID/BEAM/CR024_Vaccinee_BEAM_VDJ/BEAM/cellranger/COVID_BEAM_VDJ.csv \
+--outdir /cwork/srb108/COVID_BEAM_RETEST \
+--feature_ref /datacommons/dhvi/10X_Genomics_data/COVID/BEAM/CR024_Vaccinee_BEAM_VDJ/BEAM/cellranger/feature_reference.csv \
+--control BEAM16 \
+--clonal p \
+--cellranger 7.1.0
